@@ -1,14 +1,14 @@
 import re
 
 def create_validator_with_message(status_label, validator_type):
-    """Створює валідаційну функцію, яка оновлює статус-лейбл."""
+    """Validatin function for status label."""
     def validate_function(text):
-        # Обробка порожнього рядка
+        # empty string
         if text == "":
             status_label.config(text="")
             return True
 
-        # Валідація за типом
+        # type validation
         if validator_type == "text":
             if re.fullmatch(r"^[а-яА-ЯёЁЇїІіЄєҐґ' -]*$", text):
                 status_label.config(text="")

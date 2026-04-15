@@ -20,25 +20,24 @@ CHILDREN_DATA = '{{ДАНІ_ДІТЕЙ}}'
 CHILDREN_DATA_2 = '{{DATA_CHILDREN_2}}'
 MY_CHILD = '{{МОЮ_ДИТИНУ}}'
 MY_CHILD_2 = '{{МО_ДИТИНИ}}'
-# Плейсхолдери для старого паспорта
+# For passport-book
 OLD_PASSPORT = '{{ПАСПОРТ}}'
 ISSUED_BY = '{{ВИДАНИЙ}}'
 COMPANIONS_DATA = '{{ДАНІ_СУПРОВОДЖУЮЧИХ}}'
 COMPANIONS_ENDING = '{{ЗАКІНЧЕННЯ_ДЛЯ_СУПРОВОДЖУЮЧИХ}}' 
 COMPANIONS_ENDING_2 = '{{ЗОБОВ}}' 
-# Плейсхолдери для нового паспорта
+# For new card passport
 NEW_PASSPORT_NUMBER = '{{НОМЕР_КАРТКИ}}'
 UNZR = '{{УНЗР}}'
 ISSUING_BODY = '{{ОРГАН}}'
 ISSUE_DATE = '{{ДАТА_ВИДАЧІ}}'
 VALID_UNTIL = '{{ДІЙСНИЙ_ДО}}'
 
-# Єдиний плейсхолдер для всього блоку паспорта
+# unity passport block
 PASSPORT_BLOCK = '{{БЛОК_ПАСПОРТА}}'
 OLD_PASSPORT_TEXT_TEMPLATE = "паспорт {passport_number}, виданий {issued_by} року,"
 NEW_PASSPORT_TEXT_TEMPLATE = "паспорт {passport_number}, Запис № {unzr}, орган, що видав {organ}, дата видачі {data_vidachi}, дійсний до {dijsny_do},"
-#Тут passport_number і issued_by — це іменовані плейсхолдери.
-#А у файлі main_app.py ми заповнюємо цей шаблон, вказуючи значення для кожного імені:
+# countries
 COUNTRIES = '{{КРАЇНИ}}'
 
 PERIOD_Z = '{{ПЕРІОД_З}}'
