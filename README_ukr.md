@@ -33,7 +33,7 @@
 
 1. Склонуйте репозиторій:
 ```bash
-git clone [https://github.com/kloktadanyil/notary_tool](https://github.com/kloktadanyil/notary_tool.git)
+git clone https://github.com/kloktadanyil/notary_tool.git
 ```
    ## Як контриб'ютити
 Бажаєте допомогти з розвитком проєкту або додати нові поля в документи? Ознайомтеся з нашою інструкцією у файлі [CONTRIBUTING.md](CONTRIBUTING.md)
