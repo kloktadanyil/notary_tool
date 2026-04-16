@@ -3,36 +3,34 @@ from docx import Document
 from docx.text.paragraph import Paragraph
 from docx.table import Table
 from placeholders import *
-# --- Ваші допоміжні функції для роботи з документом ---
+
 def replace_placeholder_in_document(document_obj, data_to_fill):
     """
-    Замінює всі плейсхолдери в документі, зберігаючи форматування навколишнього тексту.
+    Replaces all placeholders in the document, preserving the formatting of the surrounding text.
     """
-    # Обробка абзаців
+    # for paragraph
     for paragraph in document_obj.paragraphs:
-        # Проходимо по словнику з даними
         for ph, value in data_to_fill.items():
             if ph in paragraph.text:
-                # Якщо плейсхолдер знайдено, ми проходимо по runs
                 for run in paragraph.runs:
                     if ph in run.text:
-                        # Замінюємо текст у run, зберігаючи його форматування
+                        # Changing text
                         run.text = run.text.replace(ph, str(value))
                         
-    # Обробка таблиць
+    # For table
     for table in document_obj.tables:
         for row in table.rows:
             for cell in row.cells:
                 for p in cell.paragraphs:
                     for ph, value in data_to_fill.items():
                         if ph in p.text:
-                            # Замінюємо текст у клітинці
+                            # changing text
                             p.text = p.text.replace(ph, str(value))
                     
                     
 def remove_text_between_placeholders(document_obj, start_placeholder, end_placeholder, replacement=""):
     """
-    Видаляє частину тексту в абзаці від одного плейсхолдера до іншого.
+    Deletes part of the text in a paragraph from one placeholder to another.
     """
     for paragraph in document_obj.paragraphs:
         if start_placeholder in paragraph.text and end_placeholder in paragraph.text:
@@ -44,35 +42,30 @@ def remove_text_between_placeholders(document_obj, start_placeholder, end_placeh
             
             paragraph.text = text_before + replacement + text_after
 
-# document_logic.py
-
-
 def convert_digit_to_text_uk(n, case="ordinal"):
     """
-    Конвертує ціле число у текстовий український формат, підтримуючи
-    кількісний, порядковий та родовий відмінки.
-    
-    :param n: Число для конвертації (очікується до 9999).
-    :param case: 'regular', 'ordinal' (порядковий - який?), 'genitive' (родовий - кого/чого?).
-    :return: Текстове представлення числа.
+    Converts an integer to Ukrainian text format, supporting
+    quantitative, ordinal, and genitive cases.
+
+    :param n: Number to convert (expected up to 9999).
+    :param case: 'regular', 'ordinal' (ordinal - which?), 'genitive' (genitive - who/what?).
+    :return: Text representation of the number.
     """
-    # --- Словники для порядкового відмінка (Ordinal) ---
-    # Чоловічий/Середній рід, наприклад: перше, десяте
+    # for the Ordinal Case 
     ones_ordinal = ["", "перше", "друге", "третє", "четверте", "п’яте", "шосте", "сьоме", "восьме", "дев’яте"]
     teens_ordinal = ["", "одинадцяте", "дванадцяте", "тринадцяте", "чотирнадцяте", "п’ятнадцяте",
                      "шістнадцяте", "сімнадцяте", "вісімнадцяте", "дев’ятнадцяте"]
     tens_ordinal = ["", "десяте", "двадцяте", "тридцяте", "сорокове", "п’ятдесяте",
                     "шістдесяте", "сімдесяте", "вісімдесяте", "дев’яносте"]
     
-    # --- Словники для родового відмінка (Genitive) ---
-    # Чоловічий/Середній рід, наприклад: першого, десятого
+    # for Genitive ---
     ones_genitive = ["", "першого", "другого", "третього", "четвертого", "п’ятого", "шостого", "сьомого", "восьмого", "дев’ятого"]
     teens_genitive = ["", "одинадцятого", "дванадцятого", "тринадцятого", "чотирнадцятого", "п’ятнадцятого",
                       "шістнадцятого", "сімнадцятого", "вісімнадцятого", "дев’ятнадцятого"]
     tens_genitive = ["", "десятого", "двадцятого", "тридцятого", "сорокового", "п’ятдесятого",
                       "шістдесятого", "сімдесятого", "вісімдесятого", "дев’яностого"]
 
-    # --- Словники для кількісного (Regular) ---
+    # -for Regular case ---
     ones_regular = ["", "один", "два", "три", "чотири", "п’ять", "шість", "сім", "вісім", "дев’ять"]
     teens_regular = ["", "одинадцять", "дванадцять", "тринадцять", "чотирнадцять", "п’ятнадцять",
                      "шістнадцять", "сімнадцять", "вісімнадцять", "дев’ятнадцять"]
@@ -89,15 +82,13 @@ def convert_digit_to_text_uk(n, case="ordinal"):
         
     original_n = n
     
-    # 1. Обробка ТИСЯЧ (завжди кількісний відмінок, окрім "тисяча/тисячі/тисяч")
+    # 1. Changing thousands
     if n >= 1000:
         thousand_part = n // 1000
         n %= 1000
-        
-        # Зберігаємо частину для наступних розрахунків
         thousands_for_declension = thousand_part 
         
-        # Обробка 100-999 для тисяч
+        # Changing 100-999 
         if thousand_part >= 100:
             result.append(hundreds[thousand_part // 100])
             thousand_part %= 100
@@ -107,7 +98,7 @@ def convert_digit_to_text_uk(n, case="ordinal"):
         elif thousand_part >= 20:
             result.append(tens_regular[thousand_part // 10])
             if thousand_part % 10 > 0:
-                # Одиниці (особлива обробка для 1 і 2)
+                # Changing 1-2
                 if thousand_part % 10 == 1:
                     result.append("одна") # 1001, 2001
                 elif thousand_part % 10 == 2:
@@ -122,7 +113,7 @@ def convert_digit_to_text_uk(n, case="ordinal"):
             else:
                 result.append(ones_regular[thousand_part])
             
-        # Закінчення для "тисяча" (Виправлено: використовуємо thousands_for_declension)
+        # Ending for "тисяча"
         last_two_digits_of_thousands = thousands_for_declension % 100
         last_digit_of_thousands = thousands_for_declension % 10
 
@@ -135,18 +126,18 @@ def convert_digit_to_text_uk(n, case="ordinal"):
         else:
             result.append("тисяч")
             
-    # 2. Обробка залишку (0-999)
+    # 2. changing 0-999
     if n > 0:
-        # Сотні (завжди кількісний)
+        # Hundreds quantitative
         hundreds_part = n // 100
         n %= 100
         
         if hundreds_part > 0:
             result.append(hundreds[hundreds_part])
             
-        # Обробка 0-99 у потрібному відмінку
+        # 0-99
         
-        # --- ЛОГІКА ДЛЯ ПОРЯДКОВОГО ВІДМІНКА (Ordinal) ---
+        # for Ordinal Case
         if case == "ordinal":
             if n == 0:
                 pass
@@ -162,29 +153,27 @@ def convert_digit_to_text_uk(n, case="ordinal"):
             elif n > 0:
                 result.append(ones_ordinal[n])
         
-        # --- ЛОГІКА ДЛЯ РОДОВОГО ВІДМІНКА (Genitive) ---
+        # for Genitive Case
         elif case == "genitive":
             if n == 0:
-                # Якщо, наприклад, рік 2000, то тут n=0.
-                # Якщо залишаємо 0, то рік буде "дві тисячі". Якщо додамо "нульового", буде дивно.
                 pass 
             elif n % 10 == 0 and n >= 20:
-                # Обробка 20, 30: 'двадцятого'
+                # 20, 30: 'двадцятого'
                 result.append(tens_genitive[n // 10])
             elif n >= 20:
-                # Обробка 25: 'двадцять' + 'п’ятого'
+                # 25: 'двадцять' + 'п’ятого'
                 result.append(tens_regular[n // 10]) 
                 n %= 10
                 if n > 0:
                     result.append(ones_genitive[n])
             elif n >= 11:
-                # Обробка 11-19: 'одинадцятого'
+                # 11-19: 'одинадцятого'
                 result.append(teens_genitive[n - 10])
             elif n > 0:
-                # Обробка 1-10: 'першого', 'десятого'
+                #  1-10: 'першого', 'десятого'
                 result.append(ones_genitive[n])
                 
-        # --- ЛОГІКА ДЛЯ КІЛЬКІСНОГО ВІДМІНКА (Regular) ---
+        # for Regular Case
         elif case == "regular":
              if 11 <= n <= 19:
                  result.append(teens_regular[n - 10])
@@ -202,17 +191,17 @@ def get_current_date_uk_full():
     from datetime import date
     today = date.today()
     
-    # 1. День: Порядковий відмінок (яке?)
+    # 1. Day for Ordinal case (яке?)
     day_text = convert_digit_to_text_uk(today.day, case="ordinal")
     
     months_uk = [
         "січня", "лютого", "березня", "квітня", "травня", "червня",
         "липня", "серпня", "вересня", "жовтня", "листопада", "грудня"
     ]
-    # 2. Місяць: Родовий відмінок
+    # 2. Month: Genitive
     month_text = months_uk[today.month - 1]
     
-    # 3. Рік: Родовий відмінок (кого/чого? - року)
+    # 3. Year: Genitive (кого? чого? - року)
     year_text = convert_digit_to_text_uk(today.year, case="genitive")
     
     return f"{day_text} {month_text} {year_text}"
