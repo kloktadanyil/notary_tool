@@ -210,24 +210,24 @@ def get_current_date_uk_full():
     from datetime import date
     today = date.today()
     
-    # 1. День: Порядковий відмінок (яке?)
+    # 1. Day (яке?)
     day_text = convert_digit_to_text_uk(today.day, case="ordinal")
     
     months_uk = [
         "січня", "лютого", "березня", "квітня", "травня", "червня",
         "липня", "серпня", "вересня", "жовтня", "листопада", "грудня"
     ]
-    # 2. Місяць: Родовий відмінок
+    # 2. Month (кого? чого?)
     month_text = months_uk[today.month - 1]
     
-    # 3. Рік: Родовий відмінок (кого/чого? - року)
+    # 3. Year (кого? чого? - року)
     year_text = convert_digit_to_text_uk(today.year, case="genitive")
     
     return f"{day_text} {month_text} {year_text}"
     
 def generate_children_text(children_list):
     """
-    Генерує єдиний рядок з даними про всіх дітей для вставки в документ.
+    Generates a single sentences with data about all children for paste into the document.
     """
     if not children_list:
         return ""
@@ -242,11 +242,11 @@ def generate_children_text(children_list):
         ending_1 = child.get('ending_1', '')
         ending_2 = child.get('ending_2', '')
 
-        # Форматуємо рядок для однієї дитини
+        # Making  a row for one child
         text = f"мо{ending_1} {age_status}{ending_2} {gender_ending} {pib}, {dob} року народження,"
         children_strings.append(text)
 
-    # Об'єднуємо всі рядки. Якщо дітей більше однієї, додаємо "та"
+    # Combine all sentences. If there is more than one child, add "та"
     if len(children_strings) == 1:
         return children_strings[0]
     else:
@@ -281,8 +281,8 @@ def generate_children_text_2 (children_list):
     
 def generate_companions_text(companion_list):
     """
-    Генерує єдиний рядок з даними про всіх супроводжуючих для вставки в документ.
-    Використовує кому після дати народження та сполучник 'та/або' для об'єднання.
+    Generates a single line with all accompanying person information for insertion into a document.
+    Uses a comma after the date of birth and the conjunction 'and/or' for combining.
     """
     if not companion_list:
         return "", "", ""
@@ -294,8 +294,8 @@ def generate_companions_text(companion_list):
         dob = companion.get('dob', '')
         gender_ending_suprov = companion.get('gender_ending_suprov', '')
 
-        # Форматуємо рядок для одного супроводжуючого
-        # Додаємо кому в кінці рядка, як було вказано.
+        # Format the string for one companion
+        # Add a comma at the end of the string.
         text = f"{pib}, {dob} року народження,"
         companion_strings.append(text)
 
@@ -309,50 +309,48 @@ def generate_companions_text(companion_list):
         companion_ending_2 = "зобов\'язуються"
     
     if num_companions == 1:
-        # У цьому випадку кома вже є в кінці, але ми її прибрали. Потрібно вирішити,
-        # чи потрібна кома в документі після єдиного супроводжуючого. 
-        # Залишимо без коми, генератор додасть її, якщо потрібно.
+    # if 1 companion, do not merge
+    # if more, merge
         return companion_strings[0], companion_ending, companion_ending_2
     
     elif num_companions >= 2:
         return " та/або ".join(companion_strings), companion_ending, companion_ending_2
     
-    return ""
+    return "", "", ""
 
-# --- Основна функція для генерації документа ---
+# Main function for document generation
 def generate_document_from_data(data_to_fill, status_label):
     try:
         template_path = 'Templates.docx'
         pib = data_to_fill.get('{{ПІБ}}')
-        # Прописуємо шлях куди зберігається документ
+        # Path to save the document
         output_dir = os.path.join('Згенеровані документи', 'Заяви','За кордон') 
         filename = f"{pib.replace(' ', '_')}.docx"
         output_path = os.path.join(output_dir, filename)
-        # Дозволяє створювати папки
+        # Allow to make new directories
         os.makedirs(output_dir, exist_ok=True)
         document = Document(template_path)
         
-        # Генеруємо текст про дітей і додаємо його до словника даних 
+        # Make the text abount children and adding it to data to fill 
         children_list = data_to_fill.get("children", [])
         data_to_fill[CHILDREN_DATA] = generate_children_text(children_list)
         data_to_fill[CHILDREN_DATA_2],data_to_fill[MY_CHILD],data_to_fill[MY_CHILD_2]= generate_children_text_2(children_list)
         print(f"Значення CHILDREN_DATA_2: {data_to_fill.get(CHILDREN_DATA_2)}")
-        # Генеруємо текст про супроводжуючих і додаємо його до словника даних
+        # Make the text abount companions and adding it to data to fill 
         companions_list = data_to_fill.get("companions", [])
         data_to_fill[COMPANIONS_DATA], data_to_fill[COMPANIONS_ENDING], data_to_fill[COMPANIONS_ENDING_2] = generate_companions_text(companions_list)
         data_to_fill[DATE_PROPYSOM] = get_current_date_uk_full ()
         
 
-        # --- ЛОГІКА ВИДАЛЕННЯ БЛОКІВ ТЕПЕР ТУТ ---
-        # Ми перевіряємо, які дані є у словнику data_to_fill
+        # deleting the blocks
         if '{{ПАСПОРТ}}' in data_to_fill:
-            # Якщо є дані для старого паспорта, видаляємо блок нового
+            # If we have old passport, deleting the new password 
             remove_text_between_placeholders(document, '{{БЛОК_НОВИЙ_ПАСПОРТ_СТАРТ}}', '{{БЛОК_НОВИЙ_ПАСПОРТ_КІНЕЦЬ}}')
         elif '{{НОМЕР_КАРТКИ}}' in data_to_fill:
-            # Якщо є дані для нового паспорта, видаляємо блок старого
+            # If we have new passport, deleting the old password 
             remove_text_between_placeholders(document, '{{БЛОК_СТАРИЙ_ПАСПОРТ_СТАРТ}}', '{{БЛОК_СТАРИЙ_ПАСПОРТ_КІНЕЦЬ}}')
 
-        # Заміна всіх плейсхолдерів (включно з маркерами блоків, які залишились)
+        # Replace all placeholders 
         replace_placeholder_in_document(document, data_to_fill)
             
         document.save(output_path)

@@ -1,5 +1,5 @@
-import tkinter as tk  # tk все ще потрібен для Toplevel, StringVar, etc.
-import tkinter.ttk as ttk  # Імпортуємо ttk як ttk
+import tkinter as tk  
+import tkinter.ttk as ttk  
 from document_logic import *
 from placeholders import *
 from validators import create_validator_with_message
@@ -9,57 +9,53 @@ app_data = {
     "user_data": {}
 }
 
-# --- Функції для створення фреймів ---
+# Create the frame 
 
 def create_country_frame_frame(parent_window, app_data, on_back_command): 
     country_frame = ttk.Frame(parent_window)
     max_columns = 5
+
+    # block 1: scroll settings AND functions definitions 
+
     
-    # ----------------------------------------------------
-    # БЛОК 1: НАЛАШТУВАННЯ ПРОКРУТКИ ТА ВИЗНАЧЕННЯ ФУНКЦІЙ
-    # ----------------------------------------------------
-    
-    # 1. Створюємо Scrollbar, Canvas та inner_frame
+    # 1.Scrollbar, Canvas та inner_frame
     scrollbar = ttk.Scrollbar(country_frame, orient="vertical")
     canvas = tk.Canvas(country_frame, yscrollcommand=scrollbar.set)
     
-    # Використовуємо grid для country_frame, щоб canvas і scrollbar займали ВЕСЬ доступний простір
+    #grid for country_frame, to took up ALL available space by canvas and scrollbar 
     canvas.grid(row=0, column=0, columnspan=max_columns, sticky="nsew")
     scrollbar.grid(row=0, column=max_columns, sticky="ns")
     
-    # Фрейм, що містить весь прокручуваний контент
+    # A frame containing all scrollable content
     inner_frame = ttk.Frame(canvas)
     
-    # Встановлюємо, що canvas і country_frame можуть розширюватися
+    # Set canvas and country_frame to expandable
     country_frame.grid_rowconfigure(0, weight=1)
-    for i in range(max_columns + 1): # +1 для scrollbar
+    for i in range(max_columns + 1): 
         country_frame.grid_columnconfigure(i, weight=1 if i < max_columns else 0)
     
-    # inner_frame повинен мати ту ж конфігурацію стовпців
+    # # inner_frame must have the same column configuration
     for i in range(max_columns):
         inner_frame.columnconfigure(i, weight=1)
         
     window_item_id = canvas.create_window((0, 0), window=inner_frame, anchor='nw')
     scrollbar.config(command=canvas.yview)
 
-    # Функція, яка оновлює scrollregion, коли inner_frame змінює розмір
     def on_frame_configure(event):
-        """Оновлює прокручувану область при зміні розміру inner_frame."""
+        """Updates the scrollable area when the inner_frame is resized."""
         canvas.config(scrollregion=canvas.bbox("all"))
 
-    # Функція, яка змушує inner_frame розтягуватися по ширині canvas
     def on_canvas_resize(event):
-        """Оновлює ширину inner_frame, щоб вона відповідала ширині canvas."""
+        """Updates the width of inner_frame to match the width of canvas."""
         canvas.itemconfigure(window_item_id, width=event.width)
-     # --- ЗМІННІ ДЛЯ КОНТРОЛЮ ШВИДКОСТІ СКРОЛІНГУ ---
-    # Кількість одиниць скролінгу за один клік коліщатка (Windows/macOS)
-    # ЗНАЧЕННЯ ПОВИННО БУТИ ЦІЛИМ ЧИСЛОМ (1 для найповільнішого)
+    #scroll speed controll 
+    # Number of scroll units per click of the wheel (Windows/macOS)
+    # VALUE MUST BE AN INTEGER (1 for slowest)
     SCROLL_UNITS_DELTA = 1 
-    # Кількість одиниць скролінгу для подій <Button-4>/<Button-5> (Linux/X11)
+    # Number of scrolling units for <Button-4>/<Button-5> events 
     SCROLL_UNITS_BUTTON = 5 
-    # Функція обробки прокрутки колесом миші
     def _on_mousewheel(event):
-        """Обробник прокрутки колесом миші з надійною крос-платформною логікою."""
+        """Mouse wheel scroll handler with robust cross-platform logic."""
         
         # 1. Linux/X11 <Button-4> (Scroll Up)
         if event.num == 4:
@@ -67,54 +63,48 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         # 2. Linux/X11 <Button-5> (Scroll Down)
         elif event.num == 5:
             canvas.yview_scroll(SCROLL_UNITS_BUTTON, "units")
-        # 3. Windows/macOS <MouseWheel> (використовує 'delta')
+        # 3. Windows/macOS <MouseWheel>
         elif hasattr(event, 'delta'):
-            # event.delta / 120 дає +/- 1 (напрямок скролінгу).
-            # Множимо на SCROLL_UNITS_DELTA для встановлення бажаної швидкості.
-            # На відміну від *0.5, тут результат гарантовано буде цілим числом або 0.
+        # event.delta / 120 gives +/- 1 (scrolling direction).
+        # Multiply by SCROLL_UNITS_DELTA to set the desired speed.
             scroll_direction = int(-1 * (event.delta / 120))
             scroll_amount = scroll_direction * SCROLL_UNITS_DELTA
             canvas.yview_scroll(scroll_amount, "units")
             
-    # Прив'язуємо функції до подій
+    # Bind functions to events
     inner_frame.bind("<Configure>", on_frame_configure)
     canvas.bind("<Configure>", on_canvas_resize)
     
-    # **********************************************
-    # КРИТИЧНИЙ РЯДОК: ПРИВ'ЯЗКА ДО ВСЬОГО ВІКНА
-    # **********************************************
+    # # Important! BINDING TO THE ENTIRE WINDOW
+    
     parent_window.bind_all("<MouseWheel>", _on_mousewheel) 
     parent_window.bind_all("<Button-4>", _on_mousewheel) 
     parent_window.bind_all("<Button-5>", _on_mousewheel)
     
-    # ----------------------------------------------------
-    # КІНЕЦЬ БЛОКУ 1: ФУНКЦІЇ ТА НАЛАШТУВАННЯ СКРОЛІНГУ
-    # ----------------------------------------------------
-    
-    
-    # 1. Ініціалізація кнопок ОК/Назад та якірної мітки
+    # ending of block 1
+      
+    # 1.Initializing the OK/Back buttons and anchor label
     ok_button = ttk.Button(inner_frame, text="ОК")
     back_button = ttk.Button(inner_frame, text="< Назад", command=on_back_command)
     anchor_widget = ttk.Label(inner_frame, text="")
-    # ... (весь подальший код функції залишається без змін)
     
-    # --- Створюємо status_label для загальних повідомлень ---
+    # status_label for general messages
     status_label = ttk.Label(inner_frame, text="")
     
     # Списки для динамічних полів
     country_frame.children_entries = []
     country_frame.companion_entries = []
     
-    # --- Створюємо окремі status_label та валідатори (без змін) ---
+    # separate status_label and validators
     status_label_period_z = ttk.Label(inner_frame, text="", style="Red.TLabel")
     status_label_period_po = ttk.Label(inner_frame, text="", style="Red.TLabel")
     status_label_countries = ttk.Label(inner_frame, text="", style="Red.TLabel")
 
-    # Припускаємо, що create_validator_with_message визначено поза цією функцією
+    # Registering
     vcmd_date_z = parent_window.register(create_validator_with_message(status_label_period_z, "date"))
     vcmd_date_po = parent_window.register(create_validator_with_message(status_label_period_po, "date"))
     
-    # --- Розміщення чекбоксів ---
+    # Checkbox placement
     label = ttk.Label(inner_frame, text="Оберіть країни:", font=("Arial", 12), justify='center')
     label.grid(row=0, column=0, columnspan=max_columns, padx=0, pady=5)
     
@@ -139,23 +129,22 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
             
     status_label_countries.grid(row=current_row + 1, column=0, columnspan=max_columns, padx=0, pady=5)
     
-    # Визначаємо рядок, з якого почнеться динамічний контент
+    # We define the line from which the dynamic content will start
     dynamic_start_row = current_row + 2 
 
-    # --- Функція для переміщення якоря та кнопок в самий низ ---
     def relocate_buttons(last_added_row):
-        """Переміщує якірний віджет та кнопки ОК/Назад на нові позиції в кінці контенту."""
-        # Переміщуємо якір на один рядок нижче від останнього доданого елемента
+        """Moves the anchor widget and OK/Back buttons to new positions at the end of the content."""
+        # Move the anchor one line below the last added element
         anchor_widget.grid(row=last_added_row + 1, column=0, columnspan=max_columns, sticky='ew')
-        # Розміщуємо кнопки ОК/Назад після якоря
+        # # Place the OK/Back buttons after the anchor
         ok_button.grid(row=last_added_row + 2, column=0, columnspan=max_columns, pady=10)
         back_button.grid(row=last_added_row + 3, column=0, columnspan=max_columns, pady=10)
         status_label.grid(row=last_added_row + 4, column=0, columnspan=max_columns, pady=10)
-        # Обов'язкове оновлення прокручуваної області
+        # Important function of  scrolling refresh
         inner_frame.event_generate('<Configure>')
 
 
-    # --- Новий блок: функція для динамічного додавання дітей ---
+# function for adding children 
     def add_child_fields():
         child_number = len(country_frame.children_entries) + 1
         child_frame = ttk.LabelFrame(inner_frame, text=f"Дані дитини #{child_number}")
@@ -163,9 +152,7 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         current_anchor_row = anchor_widget.grid_info()['row']
         child_frame.grid(row=current_anchor_row, column=0, columnspan=max_columns, padx=10, pady=10, sticky='ew')
         
-        # -----------------------------------------------------
-        # 1. СТВОРЕННЯ ПОЛІВ 
-        # ...
+        # 1. CREATING FIELDS
         label_pib = ttk.Label(child_frame, text="ПІБ дитини:")
         entry_pib = ttk.Entry(child_frame, width=50)
         label_dob = ttk.Label(child_frame, text="Дата народження:")
@@ -175,20 +162,20 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         radio_boy = ttk.Radiobutton(child_frame, text="Хлопець", variable=gender_var, value="хлопець")
         radio_girl = ttk.Radiobutton(child_frame, text="Дівчина", variable=gender_var, value="дівчина")
 
-        # Лейбли для валідації
+        # Labels for validation
         status_label_pib = ttk.Label(child_frame, text="", style="Red.TLabel")
         status_label_dob = ttk.Label(child_frame, text="", style="Red.TLabel")
 
-        # Валідатори
-        # Валідатори мають бути створені з новими status_label для уникнення перетину
+        # validation
+        # Validators should be created with new status_labels to avoid overlap
         vcmd_pib = parent_window.register(lambda p: create_validator_with_message(status_label_pib, "pib_format")(p))
         vcmd_dob = parent_window.register(lambda p: create_validator_with_message(status_label_dob, "date")(p))
 
-        # Конфігуруємо валідацію для полів
+        # Configure validation for fields
         entry_pib.config(validate="focusout", validatecommand=(vcmd_pib, '%P'))
         entry_dob.config(validate="focusout", validatecommand=(vcmd_dob, '%P'))
 
-        # 2. РОЗМІЩЕННЯ ПОЛІВ У ФРЕЙМІ 
+        # 2. ARRANGEMENT OF FIELDS IN A FRAME
         label_pib.grid(row=0, column=0, columnspan=5, padx=5, pady=2)
         entry_pib.grid(row=1, column=0, columnspan=5, padx=5, pady=2)
         status_label_pib.grid(row=2, column=0, columnspan=5, padx=5, pady=2, sticky="ew")
@@ -199,12 +186,11 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         radio_boy.grid(row=7, column=2, padx=5, pady=2)
         radio_girl.grid(row=8, column=2, padx=5, pady=2)
         
-        # -----------------------------------------------------
 
-        # 3. Переміщення якоря та кнопок
+        # 3. Moving the anchor and buttons
         relocate_buttons(child_frame.grid_info()['row'])
         
-        # 4. Зберігаємо посилання
+        # 4. Save the link
         new_child = {
             'pib_entry': entry_pib,
             'dob_entry': entry_dob,
@@ -214,17 +200,16 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         }
         country_frame.children_entries.append(new_child)
 
-
-    # --- Функція для динамічного додавання супроводжуючих ---
     def add_companion_fields():
+        """Function for dynamically adding attendants"""
         companion_number = len(country_frame.companion_entries) + 1
         companion_frame = ttk.LabelFrame(inner_frame, text=f"Дані супроводжуючого #{companion_number}")
         
-        # 3. Використовуємо якір:
+        # 3.using an anchor:
         current_anchor_row = anchor_widget.grid_info()['row']
         companion_frame.grid(row=current_anchor_row, column=0, columnspan=max_columns, padx=10, pady=10, sticky='ew')
         
-        # Поля для вводу (ПІБ та Дата народження)
+        # Input fields (Full Name and Date of Birth)
         label_pib = ttk.Label(companion_frame, text="ПІБ супроводжуючого:")
         entry_pib = ttk.Entry(companion_frame, width=50)
         label_dob = ttk.Label(companion_frame, text="Дата Народження:")
@@ -233,20 +218,20 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         gender_var_suprov = tk.StringVar(value="Чоловік")
         radio_suprov_boy = ttk.Radiobutton(companion_frame, text="Чоловік", variable=gender_var_suprov, value="Чоловік")
         radio_suprov_girk = ttk.Radiobutton(companion_frame, text="Дівчина", variable=gender_var_suprov, value="дівчина")
-        # Лейбли для валідації
+       # Validation labels
         status_label_pib = ttk.Label(companion_frame, text="", style="Red.TLabel")
         status_label_dob = ttk.Label(companion_frame, text="", style="Red.TLabel")
 
-        # Валідатори 
-        # Валідатори мають бути створені з новими status_label для уникнення перетину
+        # Validation 
+        # Validators should be created with new status_labels to avoid overlap
         vcmd_pib = parent_window.register(create_validator_with_message(status_label_pib, "pib_format"))
         vcmd_dob = parent_window.register(create_validator_with_message(status_label_dob, "date"))
 
-        # Конфігуруємо валідацію
+        # Configure validation for fields
         entry_pib.config(validate="focusout", validatecommand=(vcmd_pib, '%P'))
         entry_dob.config(validate="focusout", validatecommand=(vcmd_dob, '%P'))
 
-        # Розміщуємо віджети у фреймі
+        # ARRANGEMENT OF FIELDS IN A FRAME
         label_pib.grid(row=0, column=0, padx=5, pady=2, sticky='w')
         entry_pib.grid(row=0, column=1, padx=5, pady=2, sticky='w')
         status_label_pib.grid(row=1, column=0, columnspan=2, padx=5, pady=2, sticky="ew")
@@ -256,7 +241,7 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         label_gender.grid(row=6, column=2, padx=5, pady=2)
         radio_suprov_boy.grid(row=7, column=2, padx=5, pady=2)
         radio_suprov_girk.grid(row=8, column=2, padx=5, pady=2)
-        # Зберігаємо посилання 
+        # Save the link
         new_companion = {
             'pib_entry': entry_pib,
             'dob_entry': entry_dob,
@@ -266,20 +251,19 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         }
         country_frame.companion_entries.append(new_companion)
         
-        # Переміщення якоря та кнопок
+        # Moving the anchor and buttons
         relocate_buttons(companion_frame.grid_info()['row'])
         
         
-    # --- Статичні елементи ---
-    
-    # 4. Розміщення кнопок додавання
+    # static elements
+    # Placement of add buttons
     button_add_child = ttk.Button(inner_frame, text="Додати ще одну дитину", command=add_child_fields)
     button_add_child.grid(row=dynamic_start_row, column=0, columnspan=max_columns, padx=0, pady=5)
     
     button_add_companion = ttk.Button(inner_frame, text="Додати ще одного супроводжуючого", command=add_companion_fields)
     button_add_companion.grid(row=dynamic_start_row + 1, column=0, columnspan=max_columns, padx=0, pady=5)
     
-    # 5. Розміщення полів періоду
+    # 5. Placement of period fields
     period_row = dynamic_start_row + 2
     label_period_z = ttk.Label(inner_frame, text="Період з")
     label_period_z.grid(row=period_row, column=0, padx=0, pady=5)
@@ -293,12 +277,10 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
     entry_period_po.grid(row=period_row, column=4, padx=0, pady=5)
     status_label_period_po.grid(row=period_row, column=5, padx=0, pady=5, sticky="nswe")
 
-    # 6. Початкове розміщення якоря та кнопок
+    # Initial anchor and button placement
     relocate_buttons(period_row)
 
-    # ----------------------------------------------------
-    ## 7. Функції Валідації та Збору Даних (Об'єднаний Код)
-    # ----------------------------------------------------
+    ## 7. Validation and Data Collection Functions 
     
     def validate_country_data(checkbox_vars):
         nonlocal status_label # Доступ до status_label
