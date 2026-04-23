@@ -1,5 +1,10 @@
 # Notary Document Generator
 
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
+![python-docx](https://img.shields.io/badge/Library-python--docx-FF7F00?style=flat&logo=pypi&logoColor=white)
+![Output](https://img.shields.io/badge/Output-Word_Documents-2B579A?style=flat&logo=microsoft-word&logoColor=white)
+![Notary](https://img.shields.io/badge/Notary-Approved-darkgreen?style=flat)
+
 This program for automating the work of a notary. This application with a graphical interface (GUI) allows you to quickly and accurately generate legal documents based on pre-created Word templates (currently supports the generation of "Application for a child to travel abroad").
 
 ## Project features

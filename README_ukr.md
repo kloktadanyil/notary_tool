@@ -1,5 +1,10 @@
 # Notary Document Generator
 
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
+![python-docx](https://img.shields.io/badge/Library-python--docx-FF7F00?style=flat&logo=pypi&logoColor=white)
+![Output](https://img.shields.io/badge/Output-Word_Documents-2B579A?style=flat&logo=microsoft-word&logoColor=white)
+![Notary](https://img.shields.io/badge/Notary-Approved-darkgreen?style=flat)
+
 Программа для автоматизації роботи нотаріуса. Цей додаток з графічним інтерфейсом (GUI) дозволяє швидко та безпомилково генерувати юридичні документи на основі попередньо створених шаблонів Word (наразі підтримується генерація "Заяви на виїзд дитини за кордон").
 
 ## Особливості проєкту
