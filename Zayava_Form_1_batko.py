@@ -283,10 +283,10 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
     ## 7. Validation and Data Collection Functions 
     
     def validate_country_data(checkbox_vars):
-        nonlocal status_label # Доступ до status_label
+        nonlocal status_label # Make the status_label nonlocal
         all_valid = True
         
-        # Перевірка, чи обрана хоча б одна країна
+        # # Check if at least one country is selected
         selected_count = sum(1 for var in checkbox_vars.values() if var.get())
         if selected_count == 0:
             status_label_countries.config(text="Оберіть хоча б одну країну!", style="Red.TLabel")
@@ -294,21 +294,21 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         else:
             status_label_countries.config(text="")
         
-        # Перевірка, чи додано хоча б одну дитину
+        # Check if at least one child is selected
         if not country_frame.children_entries:
             status_label.config(text="Додайте хоча б одну дитину!", style="Red.TLabel")
             all_valid = False
         else:
-             status_label.config(text="") # Скидаємо, якщо діти є
+             status_label.config(text="") # Reset if there are children
         
-        # Валідація для всіх динамічно доданих полів дітей
+        # Validation for all added child fields
         for child_data in country_frame.children_entries:
             pib_val = child_data['pib_entry'].get()
             dob_val = child_data['dob_entry'].get()
             pib_label = child_data['pib_status_label']
             dob_label = child_data['dob_status_label']
 
-            # Перевірка ПІБ
+            # Validation PIB
             if not pib_val:
                 pib_label.config(text="Це поле обов'язкове!", style="Red.TLabel")
                 all_valid = False
@@ -317,7 +317,7 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
             else:
                 pib_label.config(text="")
 
-            # Перевірка Дати Народження
+            # Validation of date of birth
             if not dob_val:
                 dob_label.config(text="Це поле обов'язкове!", style="Red.TLabel")
                 all_valid = False
@@ -326,24 +326,24 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
             else:
                 dob_label.config(text="")
         
-        # !!! ВАЛІДАЦІЯ ДЛЯ СУПРОВОДЖУЮЧИХ !!!
+        # Validation of companions
         for comp_data in country_frame.companion_entries:
             pib_suprov_val = comp_data['pib_entry'].get()
             date_suprov_val = comp_data['dob_entry'].get()
             status_label_pib_suprov = comp_data['pib_status_label']
             status_label_date_suprov = comp_data['dob_status_label']
             
-            # Логіка "обидва або жодного"
+            # check for empty fields
             if (pib_suprov_val and not date_suprov_val) or (not pib_suprov_val and date_suprov_val):
                 status_label_pib_suprov.config(text="Заповніть обидва поля або залиште порожніми!", style="Red.TLabel")
                 status_label_date_suprov.config(text="Заповніть обидва поля або залиште порожніми!", style="Red.TLabel")
                 all_valid = False
             else:
-                # Скидаємо статус-мітки, якщо логіка "обидва/жодного" виконана
+                # Reset status labels if the "both/none" logic is accepted
                 status_label_pib_suprov.config(text="")
                 status_label_date_suprov.config(text="")
                 
-                # Додаткова валідація формату, якщо поля заповнені
+                # valodation of format
                 if pib_suprov_val:
                     is_valid_pib = create_validator_with_message(status_label_pib_suprov, 'pib_format')(pib_suprov_val)
                     if not is_valid_pib: all_valid = False
@@ -352,8 +352,7 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
                     is_valid_date = create_validator_with_message(status_label_date_suprov, 'date')(date_suprov_val)
                     if not is_valid_date: all_valid = False
 
-        # ! Валідація полів періоду
-        # Перевіряємо, чи викликана валідація на focusout
+        # ! valodation of period fields
         period_z_val = entry_period_z.get()
         period_po_val = entry_period_po.get()
         
@@ -362,13 +361,13 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
             if not period_po_val: status_label_period_po.config(text="Обов'язкове поле!", style="Red.TLabel")
             all_valid = False
         else:
-            # Якщо поля заповнені, перевіряємо формат ще раз (на випадок, якщо focusout не спрацював)
+            # If the fields are filled in, check the format again
             if not create_validator_with_message(status_label_period_z, 'date')(period_z_val):
                  all_valid = False
             if not create_validator_with_message(status_label_period_po, 'date')(period_po_val):
                  all_valid = False
                  
-            if all_valid: # Якщо обидві дати валідні
+            if all_valid: # If both dates are valid
                 status_label_period_z.config(text="")
                 status_label_period_po.config(text="")
 
@@ -381,7 +380,7 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
             
         status_label.config(text="")
         
-        # 1. ЗБІР ДАНИХ ПРО ВСІХ ДІТЕЙ
+        # 1. Data gathering of a child
         children_list = []
         for child_data in country_frame.children_entries:
             try:
@@ -389,7 +388,7 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
                 dob = child_data['dob_entry'].get()
                 gender_var = child_data['gender_var'].get()
                 
-                # Обчислення віку (припускаємо, що date імпортовано з datetime)
+                # Calculating age
                 day, month, year = map(int, dob.split('.'))
                 birth_date = date(year, month, day)
                 age = date.today().year - birth_date.year - ((date.today().month, date.today().day) < (birth_date.month, birth_date.day))
@@ -407,7 +406,7 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
                 child_data['dob_status_label'].config(text="Некоректний формат дати!", style="Red.TLabel")
                 return
             
-        # 2. ЗБІР ДАНИХ ПРО ВСІХ СУПРОВОДЖУЮЧИХ
+        # 2. Data companion of a child
         companion_list = []
         for comp_data in country_frame.companion_entries:
             pib = comp_data['pib_entry'].get()
@@ -421,8 +420,7 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
                     'gender_ending_suprov':gender_ending_suprov
                 })
         
-        # 3. ЗБЕРЕЖЕННЯ В APP_DATA
-        # Припускаємо, що константи COUNTRIES, PERIOD_Z, PERIOD_PO, CHILDREN_DATA, COMPANIONS_DATA імпортовано з placeholders.py
+        # 3. saving to  APP_DATA
         app_data["user_data"]["companions"] = companion_list 
         app_data["user_data"]["children"] = children_list 
         
@@ -431,17 +429,16 @@ def create_country_frame_frame(parent_window, app_data, on_back_command):
         app_data["user_data"][PERIOD_Z] = entry_period_z.get()
         app_data["user_data"][PERIOD_PO] = entry_period_po.get()
         
-        # 4. ГЕНЕРАЦІЯ
+        # 4. generation
         if status_label:
             status_label.config(text="Генерація документа...")
-        
-        # Припускаємо, що generate_document_from_data визначено поза цією функцією
+
         generate_document_from_data(app_data["user_data"], status_label)
 
-    # Кнопка "ОК" тепер викликає функцію, яка збереже дані та згенерує документ
+    # The "OK" button calls a function that will save the data and generate the document
     ok_button.config(command=lambda: on_ok_command(checkbox_vars, app_data))
     
-    # 7. Фінальний return фрейму
+    # 7. final return 
     return country_frame
 
 def create_zayava_1_batko_frame(parent_window, on_back_command, on_next_command):
@@ -450,10 +447,10 @@ def create_zayava_1_batko_frame(parent_window, on_back_command, on_next_command)
 
     document_form_frame = ttk.Frame(parent_window)
     
-    # Створюємо status_label для загальних повідомлень
+    #  status_label for general messages
     status_label = ttk.Label(document_form_frame, text="")
 
-    # Створюємо окремі status_label для кожного поля
+    #  separate status_labels for each field
     status_label_pib = ttk.Label(document_form_frame, text="", style="Red.TLabel")
     status_label_pib_kogo = ttk.Label(document_form_frame, text="", style="Red.TLabel")
     status_label_dob = ttk.Label(document_form_frame, text="", style="Red.TLabel")
@@ -464,7 +461,7 @@ def create_zayava_1_batko_frame(parent_window, on_back_command, on_next_command)
     status_label_appartament = ttk.Label(document_form_frame, text="", style="Red.TLabel")
     status_label_passport = ttk.Label(document_form_frame, text="", style="Red.TLabel")
 
-    # Реєстрація валідаторів, прив'язаних до цього фрейма
+    # Register validators bound to this frame
     vcmd_pib = parent_window.register(create_validator_with_message(status_label_pib, "pib_format"))
     vcmd__kogo = parent_window.register(create_validator_with_message(status_label_pib_kogo, "pib_format"))
     vcmd_date = parent_window.register(create_validator_with_message(status_label_dob, "date"))
@@ -475,7 +472,7 @@ def create_zayava_1_batko_frame(parent_window, on_back_command, on_next_command)
     vcmd_number_appartament = parent_window.register(create_validator_with_message(status_label_appartament, "number and letters"))
     
 
-    # Створення віджетів Entry
+    #  Entry widget
     entry_pib = ttk.Entry(document_form_frame, width=50, validate="focusout", validatecommand=(vcmd_pib, '%P'))
     entry_pib_kogo = ttk.Entry(document_form_frame, width=50, validate="focusout", validatecommand=(vcmd__kogo, '%P'))
     entry_dob = ttk.Entry(document_form_frame, width=50, validate="focusout", validatecommand=(vcmd_date, '%P'))
@@ -488,7 +485,7 @@ def create_zayava_1_batko_frame(parent_window, on_back_command, on_next_command)
     
     gender_var = tk.StringVar(value="чоловік")
 
-    # Словники для зручної валідації
+    # Dictionaries for convenient validation
     entries_to_validate = {
         'pib': entry_pib,
         'pib_kogo': entry_pib_kogo,
@@ -608,17 +605,17 @@ def create_zayava_1_batko_frame(parent_window, on_back_command, on_next_command)
         ok_button.pack(pady=10)
 
     def validate_all_entries():
-        """Перевіряє валідацію всіх полів введення."""
-        # Фу нкція використовує цикл for для перевірки більшості полів введення, які зберігаються у словнику entries_to_validate.
-
-        # Отримання даних: У кожній ітерації циклу, код отримує значення (value) поточного поля (entry).
-
+        """Перевіряє валідацію всіх полів введення.
+        Функція використовує цикл for для перевірки більшості полів введення, які зберігаються у словнику entries_to_validate.
+        Отримання даних: У кожній ітерації циклу, код отримує значення (value) поточного поля (entry).
+        Вибір валідатора: Потім, використовуючи відповідні словники (status_labels_map і validators_map), 
+        він динамічно створює потрібний валідатор за допомогою create_validator_with_message.
+        Виконання валідації: Створений валідатор (is_valid = create_validator_with_message(...)) перевіряє значення.
+        Встановлення статусу: Якщо перевірка не пройшла (if not is_valid:), змінна all_valid стає False. 
+        Функція продовжує перевіряти інші поля, але вже "знає", що загальний результат буде негативним.
+        all_valid = True
         
-        # Вибір валідатора: Потім, використовуючи відповідні словники (status_labels_map і validators_map), він динамічно створює потрібний валідатор за допомогою create_validator_with_message.
-        
-        # Виконання валідації: Створений валідатор (is_valid = create_validator_with_message(...)) перевіряє значення.
-
-        # Встановлення статусу: Якщо перевірка не пройшла (if not is_valid:), змінна all_valid стає False. Функція продовжує перевіряти інші поля, але вже "знає", що загальний результат буде негативним.
+        """
         all_valid = True
         for key, entry in entries_to_validate.items():
             value = entry.get()
@@ -639,7 +636,7 @@ def create_zayava_1_batko_frame(parent_window, on_back_command, on_next_command)
         return all_valid
 
     def on_button_click():
-        """Обробник натискання кнопки "Далі"."""
+        """Next button click."""
         if not validate_all_entries():
             status_label.config(text="Будь ласка, заповніть всі поля правильно!", style="Red.TLabel")
             return
@@ -684,16 +681,11 @@ def create_zayava_1_batko_frame(parent_window, on_back_command, on_next_command)
         app_data["user_data"][ENDING_3] = ending3
         app_data["user_data"][ZAYMENNYK] = zaymennyk
         app_data["user_data"][ENDING_4] = ending4
-        # app_data["Bold_formatting"] = {
-        # PIB: True,  # Вказуємо, що ПІБ  має бути жирним
-        # DATA_OF_BIRTH_DYTYNY: True, 
-        
         if len(passport_number) == 9 and passport_number.isdigit():
             open_new_passport_window(passport_number)
         elif len(passport_number) == 8 and passport_number[:2].isalpha() and passport_number[2:].isdigit():
             open_old_passport_window(passport_number)
-
-    # --- Розміщення віджетів у фреймі ---
+    # Placing widgets in a frame
     button_back = ttk.Button(document_form_frame, text="< Назад", command=on_back_command)
     button_back.pack(anchor="w", padx=10, pady=10)
 

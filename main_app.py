@@ -1,5 +1,5 @@
 import tkinter as tk
-import tkinter.ttk as ttk  # Імпортуємо ttk
+import tkinter.ttk as ttk
 from Zapovnenya_documenta import create_zapovnenya_documenta_frame
 from vybir_zayavy import create_vybir_zayavy_frame
 from zayavy_vid_batkiv_frame import create_zayavy_vid_batkiv_frame
@@ -39,7 +39,7 @@ def setup_styles():
     style = ttk.Style()
     style.configure("TButton", font=("Arial",10))
     style.configure("MainMenu.TButton", font=("Arial", 14))
-# --- Main window ---
+#Main window 
 root = tk.Tk()
 root.title("Нотаріус")
 root.geometry("1200x1000")

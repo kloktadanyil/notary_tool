@@ -1,4 +1,4 @@
-# Плейсхолдери для основних даних
+# Placeholders for main data
 PIB = '{{ПІБ}}'
 PIB_KOGO = '{{ПІБКОГО}}'
 DATE_OF_BIRTH = '{{ДАТА_НАРОДЖЕННЯ}}'
