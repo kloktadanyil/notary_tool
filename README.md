@@ -2,7 +2,7 @@
 
 This program for automating the work of a notary. This application with a graphical interface (GUI) allows you to quickly and accurately generate legal documents based on pre-created Word templates (currently supports the generation of "Application for a child to travel abroad").
 
-## Особливості проєкту
+## Project features
 
 * **Graphical interface:** Step-by-step "wizard" for creating a document, built on the `tkinter` and `ttk` libraries.
 * **Dynamic validation:** Built-in validation of input data (regular expressions) for full name, dates (DD.MM.YYYY), UNZR, identification codes (10 digits) and passport types with error highlighting.
