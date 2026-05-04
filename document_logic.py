@@ -335,7 +335,6 @@ def generate_document_from_data(data_to_fill, status_label):
         children_list = data_to_fill.get("children", [])
         data_to_fill[CHILDREN_DATA] = generate_children_text(children_list)
         data_to_fill[CHILDREN_DATA_2],data_to_fill[MY_CHILD],data_to_fill[MY_CHILD_2]= generate_children_text_2(children_list)
-        print(f"Значення CHILDREN_DATA_2: {data_to_fill.get(CHILDREN_DATA_2)}")
         # Make the text abount companions and adding it to data to fill 
         companions_list = data_to_fill.get("companions", [])
         data_to_fill[COMPANIONS_DATA], data_to_fill[COMPANIONS_ENDING], data_to_fill[COMPANIONS_ENDING_2] = generate_companions_text(companions_list)
